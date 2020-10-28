@@ -24,7 +24,7 @@ class LoadDatabase {
 	private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
 
 	@Bean
-	public RestTemplate restTemplate(RestTemplateBuilder builder) {
+	RestTemplate restTemplate(RestTemplateBuilder builder) {
 
 		RestTemplate restTemplate = builder.build();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
@@ -35,16 +35,23 @@ class LoadDatabase {
 	}
 
 	@Bean
-	CommandLineRunner initDatabase(CakeRepository repository, RestTemplate restTemplate) {
+	List<Cake> cakeList(RestTemplate restTemplate) {
+
+		ResponseEntity<Cake[]> cakesResponseBody = restTemplate.getForEntity(
+				"https://gist.githubusercontent.com/hart88/198f29ec5114a3ec3460/raw/8dd19a88f9b8d24c23d9960f3300d0c917a4f07c/cake.json",
+				Cake[].class);
+		Cake[] cakeArray = cakesResponseBody.getBody();
+		List<Cake> uniqueCakeList = Arrays.stream(cakeArray).distinct().collect(Collectors.toList());
+		return uniqueCakeList;
+	}
+
+	@Bean
+	CommandLineRunner initDatabase(CakeRepository repository, List<Cake> cakeList) {
 
 		return args -> {
-			ResponseEntity<Cake[]> cakesResponseBody = restTemplate.getForEntity(
-					"https://gist.githubusercontent.com/hart88/198f29ec5114a3ec3460/raw/8dd19a88f9b8d24c23d9960f3300d0c917a4f07c/cake.json",
-					Cake[].class);
-			Cake[] cakeArray = cakesResponseBody.getBody();
-			List<Cake> uniqueCakeList = Arrays.stream(cakeArray).distinct().collect(Collectors.toList());
-			uniqueCakeList.stream().peek(c -> log.info("Preloading " + c.toString() + " to Database"))
+			cakeList.stream().peek(c -> log.info("Preloading " + c.toString() + " to Database"))
 					.forEach(c -> repository.save(c));
 		};
 	}
+
 }

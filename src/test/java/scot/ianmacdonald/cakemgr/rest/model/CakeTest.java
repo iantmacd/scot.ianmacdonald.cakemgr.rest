@@ -1,9 +1,9 @@
 package scot.ianmacdonald.cakemgr.rest.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.Test;
-
 
 class CakeTest {
 	
@@ -23,38 +23,38 @@ class CakeTest {
 	void testEqualsMethod() {
 		
 		// simple case where the cakes are equal by value
-		assertThat(lemonCheeseCake_1).isEqualTo(lemonCheeseCake_2);
+		assertEquals(lemonCheeseCake_1, lemonCheeseCake_2);
 		
 		// test difference in each of the properties causes them not to be equal by value
-		assertThat(lemonCheeseCake_1).isNotEqualTo(lemonCheeseCake_3);
-		assertThat(lemonCheeseCake_1).isNotEqualTo(lemonCheeseCake_4);
-		assertThat(lemonCheeseCake_1).isNotEqualTo(lemonCheeseCake_5);
+		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_3);
+		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_4);
+		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_5);
 	}
 	
 	@Test
 	void testEqualsHandlesNullTitle() {
 		
-		assertThat(lemonCheeseCake_6).isEqualTo(lemonCheeseCake_7);
-		assertThat(lemonCheeseCake_6).isNotEqualTo(lemonCheeseCake_1);
-		assertThat(lemonCheeseCake_1).isNotEqualTo(lemonCheeseCake_6);
+		assertEquals(lemonCheeseCake_6, lemonCheeseCake_7);
+		assertNotEquals(lemonCheeseCake_6, lemonCheeseCake_1);
+		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_6);
 		
 	}
 	
 	@Test
 	void testEqualsHandlesNullDescription() {
 		
-		assertThat(lemonCheeseCake_8).isEqualTo(lemonCheeseCake_9);
-		assertThat(lemonCheeseCake_8).isNotEqualTo(lemonCheeseCake_1);
-		assertThat(lemonCheeseCake_1).isNotEqualTo(lemonCheeseCake_8);
+		assertEquals(lemonCheeseCake_8, lemonCheeseCake_9);
+		assertNotEquals(lemonCheeseCake_8, lemonCheeseCake_1);
+		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_8);
 		
 	}
 	
 	@Test
 	void testEqualsHandlesNullImage() {
 		
-		assertThat(lemonCheeseCake_10).isEqualTo(lemonCheeseCake_11);
-		assertThat(lemonCheeseCake_10).isNotEqualTo(lemonCheeseCake_1);
-		assertThat(lemonCheeseCake_1).isNotEqualTo(lemonCheeseCake_10);
+		assertEquals(lemonCheeseCake_10, lemonCheeseCake_11);
+		assertNotEquals(lemonCheeseCake_10, lemonCheeseCake_1);
+		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_10);
 		
 	}
 
