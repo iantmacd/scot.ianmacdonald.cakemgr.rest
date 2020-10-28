@@ -30,7 +30,7 @@ import scot.ianmacdonald.cakemgr.rest.model.CakeRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CakeManagerServiceMockMvcTest {
+public class CakeManagerMockMvcTest {
 
 	private static Cake postRequestCake = null;
 
