@@ -1,29 +1,24 @@
 package scot.ianmacdonald.cakemgr.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Class to make functional integration test of running RESTful service.
@@ -35,25 +30,14 @@ import org.junit.jupiter.api.TestMethodOrder;
  * 
  * @author ian.macdonald@ianmacdonald.scot
  */
+@SpringBootTest
 @TestMethodOrder(OrderAnnotation.class)
 public class CakeRestServiceIntegrationTest {
 
 	// test data
 
-	// Apache HTTP Client objects
-	private final CloseableHttpClient httpclient = HttpClients.createDefault();
-	private final HttpRequestBase getCakes = new HttpGet("http://localhost:8080/cakes");
-	private final HttpRequestBase postCake = new HttpPost("http://localhost:8080/cakes");
-
-	// http response codes
-
-	private final String OK = "HTTP/1.1 200 ";
-
-	private final String CREATED = "HTTP/1.1 201 ";
-
-	private final String BAD_REQUEST = "HTTP/1.1 400 ";
-
-	private final String FORBIDDEN = "HTTP/1.1 403 ";
+	@Autowired
+	private RestTemplate restTemplate = null;
 
 	// http request Strings
 
@@ -69,69 +53,99 @@ public class CakeRestServiceIntegrationTest {
 
 	// http response strings
 
-	private final String getCakesExpectedJsonResponse = "[ {\n" + "  \"id\" : 1,\n"
-			+ "  \"title\" : \"Lemon cheesecake\",\n" + "  \"desc\" : \"A cheesecake made of lemon\",\n"
-			+ "  \"image\" : \"https://s3-eu-west-1.amazonaws.com/s3.mediafileserver.co.uk/carnation/WebFiles/RecipeImages/lemoncheesecake_lg.jpg\"\n"
-			+ "}, {\n" + "  \"id\" : 2,\n" + "  \"title\" : \"victoria sponge\",\n"
-			+ "  \"desc\" : \"sponge with jam\",\n"
-			+ "  \"image\" : \"http://www.bbcgoodfood.com/sites/bbcgoodfood.com/files/recipe_images/recipe-image-legacy-id--1001468_10.jpg\"\n"
-			+ "}, {\n" + "  \"id\" : 3,\n" + "  \"title\" : \"Carrot cake\",\n"
-			+ "  \"desc\" : \"Bugs bunnys favourite\",\n"
-			+ "  \"image\" : \"http://www.villageinn.com/i/pies/profile/carrotcake_main1.jpg\"\n" + "}, {\n"
-			+ "  \"id\" : 4,\n" + "  \"title\" : \"Banana cake\",\n" + "  \"desc\" : \"Donkey kongs favourite\",\n"
-			+ "  \"image\" : \"http://ukcdn.ar-cdn.com/recipes/xlarge/ff22df7f-dbcd-4a09-81f7-9c1d8395d936.jpg\"\n"
-			+ "}, {\n" + "  \"id\" : 5,\n" + "  \"title\" : \"Birthday cake\",\n" + "  \"desc\" : \"a yearly treat\",\n"
-			+ "  \"image\" : \"http://cornandco.com/wp-content/uploads/2014/05/birthday-cake-popcorn.jpg\"\n" + "} ]";
+	private final String expectedGetCakesResponse = "{\n" + "  \"_embedded\" : {\n" + "    \"cakes\" : [ {\n"
+			+ "      \"title\" : \"Lemon cheesecake\",\n" + "      \"description\" : \"A cheesecake made of lemon\",\n"
+			+ "      \"image\" : \"https://s3-eu-west-1.amazonaws.com/s3.mediafileserver.co.uk/carnation/WebFiles/RecipeImages/lemoncheesecake_lg.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"victoria sponge\",\n" + "      \"description\" : \"sponge with jam\",\n"
+			+ "      \"image\" : \"http://www.bbcgoodfood.com/sites/bbcgoodfood.com/files/recipe_images/recipe-image-legacy-id--1001468_10.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"Carrot cake\",\n" + "      \"description\" : \"Bugs bunnys favourite\",\n"
+			+ "      \"image\" : \"http://www.villageinn.com/i/pies/profile/carrotcake_main1.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"Banana cake\",\n" + "      \"description\" : \"Donkey kongs favourite\",\n"
+			+ "      \"image\" : \"http://ukcdn.ar-cdn.com/recipes/xlarge/ff22df7f-dbcd-4a09-81f7-9c1d8395d936.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"Birthday cake\",\n" + "      \"description\" : \"a yearly treat\",\n"
+			+ "      \"image\" : \"http://cornandco.com/wp-content/uploads/2014/05/birthday-cake-popcorn.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        }\n" + "      }\n" + "    } ]\n"
+			+ "  },\n" + "  \"_links\" : {\n" + "    \"self\" : {\n"
+			+ "      \"href\" : \"http://localhost:8080/cakes\"\n" + "    },\n" + "    \"profile\" : {\n"
+			+ "      \"href\" : \"http://localhost:8080/profile/cakes\"\n" + "    }\n" + "  },\n" + "  \"page\" : {\n"
+			+ "    \"size\" : 20,\n" + "    \"totalElements\" : 5,\n" + "    \"totalPages\" : 1,\n"
+			+ "    \"number\" : 0\n" + "  }\n" + "}";
 
-	private final String getCakesAgainExpectedJsonResponse = "[ {\n" + "  \"id\" : 1,\n"
-			+ "  \"title\" : \"Lemon cheesecake\",\n" + "  \"desc\" : \"A cheesecake made of lemon\",\n"
-			+ "  \"image\" : \"https://s3-eu-west-1.amazonaws.com/s3.mediafileserver.co.uk/carnation/WebFiles/RecipeImages/lemoncheesecake_lg.jpg\"\n"
-			+ "}, {\n" + "  \"id\" : 2,\n" + "  \"title\" : \"victoria sponge\",\n"
-			+ "  \"desc\" : \"sponge with jam\",\n"
-			+ "  \"image\" : \"http://www.bbcgoodfood.com/sites/bbcgoodfood.com/files/recipe_images/recipe-image-legacy-id--1001468_10.jpg\"\n"
-			+ "}, {\n" + "  \"id\" : 3,\n" + "  \"title\" : \"Carrot cake\",\n"
-			+ "  \"desc\" : \"Bugs bunnys favourite\",\n"
-			+ "  \"image\" : \"http://www.villageinn.com/i/pies/profile/carrotcake_main1.jpg\"\n" + "}, {\n"
-			+ "  \"id\" : 4,\n" + "  \"title\" : \"Banana cake\",\n" + "  \"desc\" : \"Donkey kongs favourite\",\n"
-			+ "  \"image\" : \"http://ukcdn.ar-cdn.com/recipes/xlarge/ff22df7f-dbcd-4a09-81f7-9c1d8395d936.jpg\"\n"
-			+ "}, {\n" + "  \"id\" : 5,\n" + "  \"title\" : \"Birthday cake\",\n" + "  \"desc\" : \"a yearly treat\",\n"
-			+ "  \"image\" : \"http://cornandco.com/wp-content/uploads/2014/05/birthday-cake-popcorn.jpg\"\n" + "}, {\n"
-			+ "  \"id\" : 21,\n" + "  \"title\" : \"Rees Krispy Kreme Donut\",\n"
-			+ "  \"desc\" : \"Peanut Butter Deelishhhusssnessss\",\n"
-			+ "  \"image\" : \"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg\"\n"
-			+ "} ]";
+	private final String expectedGetCakesAgainResponse = "{\n" + "  \"_embedded\" : {\n" + "    \"cakes\" : [ {\n"
+			+ "      \"title\" : \"Lemon cheesecake\",\n" + "      \"description\" : \"A cheesecake made of lemon\",\n"
+			+ "      \"image\" : \"https://s3-eu-west-1.amazonaws.com/s3.mediafileserver.co.uk/carnation/WebFiles/RecipeImages/lemoncheesecake_lg.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"victoria sponge\",\n" + "      \"description\" : \"sponge with jam\",\n"
+			+ "      \"image\" : \"http://www.bbcgoodfood.com/sites/bbcgoodfood.com/files/recipe_images/recipe-image-legacy-id--1001468_10.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"Carrot cake\",\n" + "      \"description\" : \"Bugs bunnys favourite\",\n"
+			+ "      \"image\" : \"http://www.villageinn.com/i/pies/profile/carrotcake_main1.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"Banana cake\",\n" + "      \"description\" : \"Donkey kongs favourite\",\n"
+			+ "      \"image\" : \"http://ukcdn.ar-cdn.com/recipes/xlarge/ff22df7f-dbcd-4a09-81f7-9c1d8395d936.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"Birthday cake\",\n" + "      \"description\" : \"a yearly treat\",\n"
+			+ "      \"image\" : \"http://cornandco.com/wp-content/uploads/2014/05/birthday-cake-popcorn.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "      \"title\" : \"Rees Krispy Kreme Donut\",\n"
+			+ "      \"description\" : \"Peanut Butter Deelishhhusssnessss\",\n"
+			+ "      \"image\" : \"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg\",\n"
+			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/6\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8080/cakes/6\"\n" + "        }\n" + "      }\n" + "    } ]\n"
+			+ "  },\n" + "  \"_links\" : {\n" + "    \"self\" : {\n"
+			+ "      \"href\" : \"http://localhost:8080/cakes\"\n" + "    },\n" + "    \"profile\" : {\n"
+			+ "      \"href\" : \"http://localhost:8080/profile/cakes\"\n" + "    }\n" + "  },\n" + "  \"page\" : {\n"
+			+ "    \"size\" : 20,\n" + "    \"totalElements\" : 6,\n" + "    \"totalPages\" : 1,\n"
+			+ "    \"number\" : 0\n" + "  }\n" + "}";
 
-	private final String putCakeExpectedJsonResponse = "{\n" + "  \"id\" : 21,\n"
-			+ "  \"title\" : \"Rees Krispy Kreme Donut\",\n" + "  \"desc\" : \"Peanut Butter Deelishhhusssnessss\",\n"
-			+ "  \"image\" : \"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg\"\n"
-			+ "}";
+	private final String expectedPostCakeResponse = "{\n" + "  \"title\" : \"Rees Krispy Kreme Donut\",\n"
+			+ "  \"description\" : \"Peanut Butter Deelishhhusssnessss\",\n"
+			+ "  \"image\" : \"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg\",\n"
+			+ "  \"_links\" : {\n" + "    \"self\" : {\n" + "      \"href\" : \"http://localhost:8080/cakes/6\"\n"
+			+ "    },\n" + "    \"cake\" : {\n" + "      \"href\" : \"http://localhost:8080/cakes/6\"\n" + "    }\n"
+			+ "  }\n" + "}";
 
-	private final String putCakeDuplicateExpectedJsonResponse = "{\n"
-			+ "  \"message\" : \"A cake with the title [Rees Krispy Kreme Donut] already exists in the DB\",\n"
-			+ "  \"type\" : \"scot.ianmacdonald.cakemgr.webapp.model.CakeDaoConstraintViolationException\",\n"
-			+ "  \"causeType\" : \"org.hibernate.exception.ConstraintViolationException\",\n"
-			+ "  \"causeMessage\" : \"could not execute statement\"\n" + "}";
+	private final String expectedPostDuplicateCakeResponse = "{\"status\":\"FORBIDDEN\",\"message\":\"It is forbidden to create a Cake with a duplicate title\",\"debugMessage\":\"could not execute statement; SQL [n/a]; constraint [\\\"PUBLIC.UK_O5VGXH55G2VXMKU8W39A88WH0_INDEX_1 ON PUBLIC.CAKE(TITLE) VALUES 6\\\"; SQL statement:\\ninsert into cake (description, image, title, id) values (?, ?, ?, ?) [23505-200]]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement\"}";
 
-	private final String putCakeMalformedJsonExpectedJsonResponse = "{\n"
-			+ "  \"message\" : \"Problem converting JSON object to scot.ianmacdonald.cakemgr.webapp.model.CakeEntity\",\n"
-			+ "  \"type\" : \"scot.ianmacdonald.cakemgr.webapp.model.PojoJsonConverterException\",\n"
-			+ "  \"causeType\" : \"com.fasterxml.jackson.core.JsonParseException\",\n"
-			+ "  \"causeMessage\" : \"Unexpected character (':' (code 58)): was expecting double-quote to start field name\\n at [Source: {\\n  :title\\\" : \\\"Rees Krispy Kreme Donut\\\",\\n  \\\"desc\\\" : \\\"Peanut Butter Deelishhhusssnessss\\\",\\n  \\\"image\\\" : \\\"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg\\\"\\n}; line: 2, column: 4]\"\n"
-			+ "}";
+	private final String expectedPostCakeMalformedJsonResponse = "{\"status\":\"BAD_REQUEST\",\"message\":\"The JSON message in the HTTP request was malformed\",\"debugMessage\":\"JSON parse error: Unexpected character (':' (code 58)): was expecting double-quote to start field name; nested exception is com.fasterxml.jackson.core.JsonParseException: Unexpected character (':' (code 58)): was expecting double-quote to start field name\\n at [Source: (org.apache.catalina.connector.CoyoteInputStream); line: 2, column: 4]\"}";
 
 	@Test
 	@Order(1)
-	public void testGetCakes() throws Exception {
+	public void testGetCakes() {
 
-		testRequest(getCakes, null, OK, "Lemon cheesecake");
-
+		testJsonHalRequest(HttpMethod.GET, null, HttpStatus.OK, expectedGetCakesResponse);
 	}
 
 	@Test
 	@Order(2)
 	public void testPostCake() throws Exception {
 
-		testRequest(postCake, putCakeJsonRequest, CREATED, "Rees Krispy Kreme Donut");
+		testJsonHalRequest(HttpMethod.POST, putCakeJsonRequest, HttpStatus.CREATED, expectedPostCakeResponse);
 
 	}
 
@@ -139,7 +153,8 @@ public class CakeRestServiceIntegrationTest {
 	@Order(3)
 	public void testPostDuplicateCake() throws Exception {
 
-		testRequest(postCake, putCakeJsonRequest, FORBIDDEN, "It is forbidden to create a Cake with a duplicate title");
+		testJsonHalRequest(HttpMethod.POST, putCakeJsonRequest, HttpStatus.FORBIDDEN,
+				expectedPostDuplicateCakeResponse);
 
 	}
 
@@ -147,7 +162,7 @@ public class CakeRestServiceIntegrationTest {
 	@Order(4)
 	public void testGetCakesAgain() throws Exception {
 
-		testRequest(getCakes, null, OK, "Rees Krispy Kreme Donut");
+		testJsonHalRequest(HttpMethod.GET, null, HttpStatus.OK, expectedGetCakesAgainResponse);
 
 	}
 
@@ -155,81 +170,42 @@ public class CakeRestServiceIntegrationTest {
 	@Order(5)
 	public void testPostCakeMalformedJson() throws Exception {
 
-		testRequest(postCake, putCakeMalformedJsonRequest, BAD_REQUEST, "The JSON message in the HTTP request was malformed");
+		testJsonHalRequest(HttpMethod.POST, putCakeMalformedJsonRequest, HttpStatus.BAD_REQUEST,
+				expectedPostCakeMalformedJsonResponse);
 
 	}
 
-	private void testRequest(final HttpRequestBase request, final String jsonRequestBody,
-			final String expectedReponseCode, final String expectedJsonResponse)
-			throws IOException, ClientProtocolException {
+	private void testJsonHalRequest(final HttpMethod httpMethod, final String jsonRequestBody,
+			final HttpStatus expectedHttpStatus, final String expectedJsonHalResponse) {
 
-		// Printing the method used
-		System.out.println("Request Type: " + request.getMethod());
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaTypes.HAL_JSON);
+		httpHeaders.setAccept(Collections.singletonList(MediaTypes.HAL_JSON));
+		HttpEntity<String> entity = new HttpEntity<String>(jsonRequestBody, httpHeaders);
 
-		// perform http post specific setup
-		if ((request instanceof HttpPost)) {
-
-			// cannot process an HTTP POST request without a JSON request body
-			if (jsonRequestBody == null) {
-				fail("Cannot test an HTTP POST call without a JSON request body");
-			}
-
-			// output the request body
-			System.out.println("Request Body:");
-			System.out.println(jsonRequestBody);
-
-			// carry on with setup for a post request
-			StringEntity entity = new StringEntity(jsonRequestBody);
-			((HttpPost) request).setEntity(entity);
-			request.setHeader("Content-Type", "application/json");
-
+		ResponseEntity<String> response = null;
+		HttpStatus actualHttpStatus = null;
+		HttpHeaders actualHeaders = null;
+		MediaType actualContentType = null;
+		String actualJsonHalResponse = null;
+		try {
+			response = restTemplate.exchange("http://localhost:8080/cakes", httpMethod, entity, String.class, 1);
+			actualHttpStatus = response.getStatusCode();
+			actualHeaders = response.getHeaders();
+			actualJsonHalResponse = response.getBody();
+		} catch (HttpClientErrorException ex) {
+			actualHttpStatus = ex.getStatusCode();
+			actualHeaders = ex.getResponseHeaders();
+			actualJsonHalResponse = ex.getResponseBodyAsString();
 		}
+		actualContentType = actualHeaders.getContentType();
 
-		// get and post requests both expect response of application/json
-		request.setHeader("Accept", "application/json");
+		assertEquals(actualHttpStatus, expectedHttpStatus);
+		assertEquals(MediaTypes.HAL_JSON, actualContentType);
 
-		// Execute the request
-		HttpResponse httpResponse = httpclient.execute(request);
-
-		// get the HTTP response code
-		final StatusLine httpResponseStatusLine = httpResponse.getStatusLine();
-		final String actualHttpResponseCode = toStingNullSafe(httpResponseStatusLine);
-
-		// get the HTTP response Content-Type header
-		final Header httpResonseContentTypeHeader = httpResponse.getFirstHeader("Content-Type");
-		final String actualHttpResponseContentTypeHeader = toStingNullSafe(httpResonseContentTypeHeader);
-
-		// get the InputStream for the response
-		InputStream inputStream = httpResponse.getEntity().getContent();
-		// convert HTTP response body to a String
-		final String actualJsonResponseBody = new BufferedReader(new InputStreamReader(inputStream)).lines()
-				.collect(Collectors.joining("\n"));
-
-		// output the response code
-		System.out.println("Response Code: " + actualHttpResponseCode);
-
-		// output the response headers
-		System.out.println(actualHttpResponseContentTypeHeader);
-
-		// output the response body
-		System.out.println("Response Body:");
-		System.out.println(actualJsonResponseBody + "\n");
-
-		// assert that the response code had the expected value
-		assertEquals(expectedReponseCode, actualHttpResponseCode);
-		// assert that the Content-Type header is application/json
-		assertEquals("Content-Type: application/json", actualHttpResponseContentTypeHeader);
-		// assert that the response body had the expected value
-		assertTrue(actualJsonResponseBody.contains(expectedJsonResponse));
-
+		System.out.println("The response body from restTemplate is:");
+		System.out.println(actualJsonHalResponse);
+		assertEquals(expectedJsonHalResponse, actualJsonHalResponse);
 	}
 
-	/**
-	 * Get a String representation of the object in a NullPointerException safe
-	 * manner
-	 */
-	private String toStingNullSafe(final Object object) {
-		final String actualHttpResponseCode = (object == null) ? "" : object.toString();
-		return actualHttpResponseCode;
-	}
 }

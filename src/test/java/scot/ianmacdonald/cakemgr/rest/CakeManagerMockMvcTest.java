@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
@@ -44,18 +45,17 @@ public class CakeManagerMockMvcTest {
 
 	@Autowired
 	private CakeRepository cakeRepository;
-	
+
 	@Autowired
 	private MockMvc mockMvc;
 
 	@BeforeAll
-	static void initDataFromContext(@Autowired List<Cake> cakeList)
-			throws JsonProcessingException {
+	static void initDataFromContext(@Autowired List<Cake> initialCakeList) throws JsonProcessingException {
 
 		postRequestCake = new Cake("Rees Krispy Kreme Donut", "Peanut Butter Deelishhhusssnessss",
 				"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg");
 
-		expectedDbCakes = cakeList;
+		expectedDbCakes = initialCakeList;
 		expectedDbCakesAfterPost = new ArrayList<>(expectedDbCakes);
 		expectedDbCakesAfterPost.add(postRequestCake);
 
@@ -67,8 +67,8 @@ public class CakeManagerMockMvcTest {
 	@Test
 	public void testGetCakes() throws Exception {
 
-		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaTypes.HAL_JSON)).andDo(print())
+				.andExpect(status().isOk()).andExpect(content().contentType(MediaTypes.HAL_JSON))
 				.andExpect(jsonPath("$._embedded.cakes").isArray())
 				.andExpect(jsonPath("$._embedded.cakes.length()", is(5)));
 
@@ -79,9 +79,9 @@ public class CakeManagerMockMvcTest {
 	@DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
 	public void testPostCakes() throws Exception {
 
-		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON)
 				.content(postRequestCakeJson)).andDo(print()).andExpect(status().isCreated())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().contentType(MediaTypes.HAL_JSON))
 				.andExpect(jsonPath("$.title", is(postRequestCake.getTitle())))
 				.andExpect(jsonPath("$.description", is(postRequestCake.getDescription())))
 				.andExpect(jsonPath("$.image", is(postRequestCake.getImage())))
@@ -92,14 +92,13 @@ public class CakeManagerMockMvcTest {
 	@Test
 	@DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
 	public void testPostDuplicateCake() throws Exception {
-		
+
 		// add the Cake to the DB which will cause a duplicate to be present
 		cakeRepository.save(postRequestCake);
 
-		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON)
 				.content(postRequestCakeJson)).andDo(print()).andExpect(status().isForbidden())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.status", is("FORBIDDEN"))).andExpect(jsonPath("$.timestamp").exists())
+				.andExpect(content().contentType(MediaTypes.HAL_JSON)).andExpect(jsonPath("$.status", is("FORBIDDEN")))
 				.andExpect(jsonPath("$.message", is("It is forbidden to create a Cake with a duplicate title")))
 				.andExpect(jsonPath("$.debugMessage", is(
 						"could not execute statement; SQL [n/a]; constraint [\"PUBLIC.UK_O5VGXH55G2VXMKU8W39A88WH0_INDEX_1 ON PUBLIC.CAKE(TITLE) VALUES 6\"; SQL statement:\ninsert into cake (description, image, title, id) values (?, ?, ?, ?) [23505-200]]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement")));
@@ -108,12 +107,12 @@ public class CakeManagerMockMvcTest {
 	@Test
 	@DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
 	public void testGetCakesAfterPost() throws Exception {
-		
+
 		// add the Cake to the DB which will cause an additional cake to be present
 		cakeRepository.save(postRequestCake);
 
-		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaTypes.HAL_JSON)).andDo(print())
+				.andExpect(status().isOk()).andExpect(content().contentType(MediaTypes.HAL_JSON))
 				.andExpect(jsonPath("$._embedded.cakes").isArray())
 				.andExpect(jsonPath("$._embedded.cakes.length()", is(6)));
 
@@ -123,10 +122,10 @@ public class CakeManagerMockMvcTest {
 	@Test
 	public void testPostCakeBadJson() throws Exception {
 
-		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON)
 				.content(postRequestCakeBadJson)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.status", is("BAD_REQUEST"))).andExpect(jsonPath("$.timestamp").exists())
+				.andExpect(content().contentType(MediaTypes.HAL_JSON))
+				.andExpect(jsonPath("$.status", is("BAD_REQUEST")))
 				.andExpect(jsonPath("$.message", is("The JSON message in the HTTP request was malformed")))
 				.andExpect(jsonPath("$.debugMessage", is(
 						"JSON parse error: Unexpected character (';' (code 59)): was expecting a colon to separate field name and value; nested exception is com.fasterxml.jackson.core.JsonParseException: Unexpected character (';' (code 59)): was expecting a colon to separate field name and value\n at [Source: (org.springframework.mock.web.DelegatingServletInputStream); line: 1, column: 10]")));
@@ -150,7 +149,7 @@ public class CakeManagerMockMvcTest {
 				.andExpect(jsonPath("$.page.size", is(20))).andExpect(jsonPath("$.page.totalElements", is(i)))
 				.andExpect(jsonPath("$.page.totalPages", is(1))).andExpect(jsonPath("$.page.number", is(0)));
 	}
-	
+
 	private String getEmbeddedCakesJsonPath(final int index, final String field) {
 		return String.format("$._embedded.cakes[%d].%s", index, field);
 	}

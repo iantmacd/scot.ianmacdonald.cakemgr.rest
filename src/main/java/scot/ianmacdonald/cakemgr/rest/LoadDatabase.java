@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -29,13 +30,13 @@ class LoadDatabase {
 		RestTemplate restTemplate = builder.build();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter
-				.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
+				.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
 		restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
 		return restTemplate;
 	}
 
 	@Bean
-	List<Cake> cakeList(RestTemplate restTemplate) {
+	List<Cake> initialCakeList(RestTemplate restTemplate) {
 
 		ResponseEntity<Cake[]> cakesResponseBody = restTemplate.getForEntity(
 				"https://gist.githubusercontent.com/hart88/198f29ec5114a3ec3460/raw/8dd19a88f9b8d24c23d9960f3300d0c917a4f07c/cake.json",
