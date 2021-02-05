@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import scot.ianmacdonald.cakemgr.rest.model.CakeRepository;
 
 @SpringBootTest
-class CakeManagerApplicationTests {
+class CakeManagerApplicationTest {
 	
 	@Autowired
 	private CakeRepository cakeRepository;

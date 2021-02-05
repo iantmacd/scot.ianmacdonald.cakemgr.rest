@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -22,11 +24,17 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Class to make functional integration test of running RESTful service.
- * FixMethodOrder(MethodSorters.NAME_ASCENDING) annotation is used to mandate
- * the order the tests run in so the DB does not have to be torn down and set up
- * in between tests. This is not best practice as ideally each test runs in an
- * idempotent fashion. However, the tests will be launched from maven which will
- * handle starting and stopping the application so the results are predictable.
+ * 
+ * @TestMethodOrder(OrderAnnotation.class) annotation is used to mandate the
+ *                                         order the tests run in so the DB does
+ *                                         not have to be torn down and set up
+ *                                         in between tests. This is not best
+ *                                         practice as ideally each test runs in
+ *                                         an idempotent fashion. However, the
+ *                                         tests will be launched from maven
+ *                                         which will handle starting and
+ *                                         stopping the application so the
+ *                                         results are predictable.
  * 
  * @author ian.macdonald@ianmacdonald.scot
  */
@@ -189,7 +197,7 @@ public class CakeRestServiceIntegrationTest {
 		MediaType actualContentType = null;
 		String actualJsonHalResponse = null;
 		try {
-			response = restTemplate.exchange("http://localhost:8080/cakes", httpMethod, entity, String.class, 1);
+			response = restTemplate.exchange("http://localhost:8080/cakes", httpMethod, entity, String.class);
 			actualHttpStatus = response.getStatusCode();
 			actualHeaders = response.getHeaders();
 			actualJsonHalResponse = response.getBody();

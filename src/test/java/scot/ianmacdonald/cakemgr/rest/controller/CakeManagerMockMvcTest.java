@@ -1,4 +1,4 @@
-package scot.ianmacdonald.cakemgr.rest;
+package scot.ianmacdonald.cakemgr.rest.controller;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
