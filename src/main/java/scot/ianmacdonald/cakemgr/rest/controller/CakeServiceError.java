@@ -8,16 +8,6 @@ class CakeServiceError {
 	private String message;
 	private String debugMessage;
 
-	CakeServiceError(HttpStatus status) {
-		this.status = status;
-	}
-
-	CakeServiceError(HttpStatus status, Throwable ex) {
-		this.status = status;
-		this.message = "Unexpected error";
-		this.debugMessage = ex.getLocalizedMessage();
-	}
-
 	CakeServiceError(HttpStatus status, String message, Throwable ex) {
 		this.status = status;
 		this.message = message;
