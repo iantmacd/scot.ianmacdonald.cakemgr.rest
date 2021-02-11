@@ -1,14 +1,14 @@
-package scot.ianmacdonald.cakemgr.rest.controller;
+package scot.ianmacdonald.cakemgr.rest.model;
 
 import org.springframework.http.HttpStatus;
 
-class CakeServiceError {
+public class CakeServiceError {
 
 	private HttpStatus status;
 	private String message;
 	private String debugMessage;
 
-	CakeServiceError(HttpStatus status, String message, Throwable ex) {
+	public CakeServiceError(HttpStatus status, String message, Throwable ex) {
 		this.status = status;
 		this.message = message;
 		this.debugMessage = ex.getLocalizedMessage();
