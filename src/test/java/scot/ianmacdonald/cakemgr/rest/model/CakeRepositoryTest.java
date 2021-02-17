@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,32 +21,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CakeRepositoryTest {
 
-	private static final Cake lemonCheesecake = new Cake("Lemon Cheesecake", "Lemony, Creamy, Cheesy and DEEELLISSSHHUSSS",
+	private final Cake lemonCheesecake = new Cake("Lemon Cheesecake", "Lemony, Creamy, Cheesy and DEEELLISSSHHUSSS",
 			"http://www.cakes.org/pics/lemoncheessecake.jpg");
 	
-	private static final Cake chocolateCake = new Cake("Chocolate Cake", "You can never go wrong with chok let",
+	private final Cake chocolateCake = new Cake("Chocolate Cake", "You can never go wrong with chok let",
 			"http://www.cakes.org/pics/chocolatecake.jpg");
 	
-	private static final Cake banoffeePie = new Cake("BanoffeePie", "Is it banana or toffee?",
+	private final Cake banoffeePie = new Cake("BanoffeePie", "Is it banana or toffee? No, just taysteee!",
 			"http://www.cakes.org/pics/banoffeepie.jpg");
 	
-	private static List<Cake> expectedCakeList = new ArrayList<>();
+	private final Cake nameDuplicateCake = new Cake("Lemon Cheesecake", "Made from cream cheese and lemons",
+			"http://www.cheeseythings.org/pics/lemoncheessecake.jpg");
 	
-	private static List<Cake> expectedCakeListAfterSave = null;
+	private List<Cake> expectedCakeList = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake));
 	
-	private static CakeRepository cakeRepository = null;
-
-	@BeforeAll
-	public static void setUpClassTestData(@Autowired CakeRepository cakeRepository) {
-		
-		CakeRepositoryTest.cakeRepository = cakeRepository;
-		
-		expectedCakeList.add(lemonCheesecake);
-		expectedCakeList.add(chocolateCake);
-		
-		expectedCakeListAfterSave = new ArrayList<Cake>(expectedCakeList);
-		expectedCakeListAfterSave.add(banoffeePie);
-	}
+	private List<Cake> expectedCakeListAfterSave = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake, banoffeePie));
+	
+	@Autowired
+	CakeRepository cakeRepository = null;
 	
 	@BeforeEach
 	public void setupTestData() {
@@ -75,10 +67,10 @@ public class CakeRepositoryTest {
 	public void testSave() {
 
 		// save the cake through the repository method
-		Cake actualBanoffePie = cakeRepository.save(banoffeePie);
+		Cake actualBanoffeePie = cakeRepository.save(banoffeePie);
 
 		// test the cake returned from the repository is the same as the one saved
-		assertEquals(banoffeePie, actualBanoffePie);
+		assertEquals(banoffeePie, actualBanoffeePie);
 		
 		// test the cake list includes the banoffee pie now
 		List<Cake> actualCakeListAfterSave = cakeRepository.findAll();
@@ -89,8 +81,6 @@ public class CakeRepositoryTest {
 	public void testExceptionThrownWhenDuplicateNameSaved() {
 		
 		// test that exception is thrown when we try to commit a Cake with duplicate name
-		Cake nameDuplicateCake = new Cake("Lemon Cheesecake", "Made from cream cheese and lemons",
-				"http://www.cheeseythings.org/pics/lemoncheessecake.jpg");
 		DataIntegrityViolationException ex = assertThrows(DataIntegrityViolationException.class, () -> {
 			cakeRepository.save(nameDuplicateCake);
 		});
@@ -98,6 +88,12 @@ public class CakeRepositoryTest {
 		// test that the cause of the DataIntegrityViolationException is a constraint violation
 		Throwable cause = ex.getCause();
 		assertEquals(ConstraintViolationException.class, cause.getClass());
+		assertEquals("could not execute statement; SQL [n/a]; constraint [\"PUBLIC.UK_O5VGXH55G2VXMKU8W39A88WH0_INDEX_1 ON PUBLIC.CAKE(TITLE) VALUES 1\"; SQL statement:\n"
+				+ "insert into cake (description, image, title, id) values (?, ?, ?, ?) [23505-200]]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement", ex.getMessage());
+		
+		// test that the duplicate cake was not created
+		List<Cake> actualCakeList = cakeRepository.findAll();
+		assertEquals(expectedCakeList, actualCakeList);
 	}
 
 }
