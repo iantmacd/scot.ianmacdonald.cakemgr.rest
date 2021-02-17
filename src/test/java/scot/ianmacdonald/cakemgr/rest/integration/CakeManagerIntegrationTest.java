@@ -3,7 +3,6 @@ package scot.ianmacdonald.cakemgr.rest.integration;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,7 +66,7 @@ public class CakeManagerIntegrationTest {
 	@Test
 	public void testGetCakes() throws Exception {
 
-		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaTypes.HAL_JSON)).andDo(print())
+		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaTypes.HAL_JSON))
 				.andExpect(status().isOk()).andExpect(content().contentType(MediaTypes.HAL_JSON))
 				.andExpect(jsonPath("$._embedded.cakes").isArray())
 				.andExpect(jsonPath("$._embedded.cakes.length()", is(5)));
@@ -80,7 +79,7 @@ public class CakeManagerIntegrationTest {
 	public void testPostCakes() throws Exception {
 
 		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON)
-				.content(postRequestCakeJson)).andDo(print()).andExpect(status().isCreated())
+				.content(postRequestCakeJson)).andExpect(status().isCreated())
 				.andExpect(content().contentType(MediaTypes.HAL_JSON))
 				.andExpect(jsonPath("$.title", is(postRequestCake.getTitle())))
 				.andExpect(jsonPath("$.description", is(postRequestCake.getDescription())))
@@ -97,7 +96,7 @@ public class CakeManagerIntegrationTest {
 		cakeRepository.save(postRequestCake);
 
 		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON)
-				.content(postRequestCakeJson)).andDo(print()).andExpect(status().isForbidden())
+				.content(postRequestCakeJson)).andExpect(status().isForbidden())
 				.andExpect(content().contentType(MediaTypes.HAL_JSON)).andExpect(jsonPath("$.status", is("FORBIDDEN")))
 				.andExpect(jsonPath("$.message", is("It is forbidden to create a Cake with a duplicate title")))
 				.andExpect(jsonPath("$.debugMessage", is(
@@ -111,7 +110,7 @@ public class CakeManagerIntegrationTest {
 		// add the Cake to the DB which will cause an additional cake to be present
 		cakeRepository.save(postRequestCake);
 
-		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaTypes.HAL_JSON)).andDo(print())
+		ResultActions getResultActions = mockMvc.perform(get("/cakes").accept(MediaTypes.HAL_JSON))
 				.andExpect(status().isOk()).andExpect(content().contentType(MediaTypes.HAL_JSON))
 				.andExpect(jsonPath("$._embedded.cakes").isArray())
 				.andExpect(jsonPath("$._embedded.cakes.length()", is(6)));
@@ -123,7 +122,7 @@ public class CakeManagerIntegrationTest {
 	public void testPostCakeBadJson() throws Exception {
 
 		mockMvc.perform(post("/cakes").contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON)
-				.content(postRequestCakeBadJson)).andDo(print()).andExpect(status().isBadRequest())
+				.content(postRequestCakeBadJson)).andExpect(status().isBadRequest())
 				.andExpect(content().contentType(MediaTypes.HAL_JSON))
 				.andExpect(jsonPath("$.status", is("BAD_REQUEST")))
 				.andExpect(jsonPath("$.message", is("The JSON message in the HTTP request was malformed")))
