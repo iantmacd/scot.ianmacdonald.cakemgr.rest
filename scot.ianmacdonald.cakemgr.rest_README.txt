@@ -128,7 +128,7 @@ A test which uses @SpringBootTest with @AutoConfigureMockMvc to test the applica
 A static @BeforeAll method is used with an @Autowired List<Cake> parameter to initialise static test data fields from the application context.
 All test methods which change the state of the H2 DB use the @DirtiesContext(methodMode = MethodMode.AFTER_METHOD) annotation.  This causes the application context to be discarded and reloaded after each such test, which results in class LoadDatabase reinitialising the default data in the H2 DB.  This results in the test methods executing idempotently.
 
-2.2.4 Java Package scot.ianmacdonald.cakemgr.rest.integration
+2.2.4 Java Package scot.ianmacdonald.cakemgr.rest.functional
 
 Class CakeRestServiceIntegrationTest
 

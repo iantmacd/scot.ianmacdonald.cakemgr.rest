@@ -1,4 +1,4 @@
-package scot.ianmacdonald.cakemgr.rest.controller;
+package scot.ianmacdonald.cakemgr.rest.integration;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,7 +31,7 @@ import scot.ianmacdonald.cakemgr.rest.model.CakeRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CakeManagerMockMvcTest {
+public class CakeManagerIntegrationTest {
 
 	private static Cake postRequestCake = null;
 

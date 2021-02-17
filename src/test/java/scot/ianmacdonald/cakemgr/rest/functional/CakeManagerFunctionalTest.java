@@ -1,4 +1,4 @@
-package scot.ianmacdonald.cakemgr.rest.integration;
+package scot.ianmacdonald.cakemgr.rest.functional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,7 +38,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @SpringBootTest
 @TestMethodOrder(OrderAnnotation.class)
-public class CakeRestServiceIntegrationTest {
+public class CakeManagerFunctionalTest {
 
 	// test data
 

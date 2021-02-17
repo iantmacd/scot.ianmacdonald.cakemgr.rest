@@ -47,11 +47,11 @@ class LoadDatabase {
 	}
 
 	@Bean
-	CommandLineRunner initDatabase(CakeRepository repository, List<Cake> cakeList) {
+	CommandLineRunner initDatabase(CakeRepository cakeRepository, List<Cake> cakeList) {
 
 		return args -> {
 			cakeList.stream().peek(c -> log.info("Preloading " + c.toString() + " to Database"))
-					.forEach(c -> repository.save(c));
+					.forEach(c -> cakeRepository.save(c));
 		};
 	}
 

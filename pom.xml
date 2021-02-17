@@ -118,7 +118,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/*IntegrationTest</exclude>
+						<exclude>**/*FunctionalTest</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -135,7 +135,7 @@
 				</executions>
 				<configuration>
 					<includes>
-						<include>**/*IntegrationTest</include>
+						<include>**/*FunctionalTest</include>
 					</includes>
 				</configuration>
 			</plugin>
