@@ -100,11 +100,11 @@
 							</build>
 							<run>
 								<ports>
-									<port>8080:8080</port>
+									<port>8081:8081</port>
 								</ports>
 								<wait>
 									<!-- Check for this URL to return a 200 return code -->
-									<url>http://localhost:8080/</url>
+									<url>http://localhost:8081/</url>
 									<time>120000</time>
 								</wait>
 							</run>

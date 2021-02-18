@@ -8,8 +8,6 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,14 +34,12 @@ import org.springframework.web.client.RestTemplate;
  * 
  * @author ian.macdonald@ianmacdonald.scot
  */
-@SpringBootTest
 @TestMethodOrder(OrderAnnotation.class)
 public class CakeManagerFunctionalTest {
 
 	// test data
 
-	@Autowired
-	private RestTemplate restTemplate = null;
+	private RestTemplate restTemplate = new RestTemplate();
 
 	// http request Strings
 
@@ -63,31 +59,31 @@ public class CakeManagerFunctionalTest {
 			+ "      \"title\" : \"Lemon cheesecake\",\n" + "      \"description\" : \"A cheesecake made of lemon\",\n"
 			+ "      \"image\" : \"https://s3-eu-west-1.amazonaws.com/s3.mediafileserver.co.uk/carnation/WebFiles/RecipeImages/lemoncheesecake_lg.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/1\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/1\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"victoria sponge\",\n" + "      \"description\" : \"sponge with jam\",\n"
 			+ "      \"image\" : \"http://www.bbcgoodfood.com/sites/bbcgoodfood.com/files/recipe_images/recipe-image-legacy-id--1001468_10.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/2\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/2\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"Carrot cake\",\n" + "      \"description\" : \"Bugs bunnys favourite\",\n"
 			+ "      \"image\" : \"http://www.villageinn.com/i/pies/profile/carrotcake_main1.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/3\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/3\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"Banana cake\",\n" + "      \"description\" : \"Donkey kongs favourite\",\n"
 			+ "      \"image\" : \"http://ukcdn.ar-cdn.com/recipes/xlarge/ff22df7f-dbcd-4a09-81f7-9c1d8395d936.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/4\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/4\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"Birthday cake\",\n" + "      \"description\" : \"a yearly treat\",\n"
 			+ "      \"image\" : \"http://cornandco.com/wp-content/uploads/2014/05/birthday-cake-popcorn.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        }\n" + "      }\n" + "    } ]\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/5\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/5\"\n" + "        }\n" + "      }\n" + "    } ]\n"
 			+ "  },\n" + "  \"_links\" : {\n" + "    \"self\" : {\n"
-			+ "      \"href\" : \"http://localhost:8080/cakes\"\n" + "    },\n" + "    \"profile\" : {\n"
-			+ "      \"href\" : \"http://localhost:8080/profile/cakes\"\n" + "    }\n" + "  },\n" + "  \"page\" : {\n"
+			+ "      \"href\" : \"http://localhost:8081/cakes\"\n" + "    },\n" + "    \"profile\" : {\n"
+			+ "      \"href\" : \"http://localhost:8081/profile/cakes\"\n" + "    }\n" + "  },\n" + "  \"page\" : {\n"
 			+ "    \"size\" : 20,\n" + "    \"totalElements\" : 5,\n" + "    \"totalPages\" : 1,\n"
 			+ "    \"number\" : 0\n" + "  }\n" + "}";
 
@@ -95,45 +91,45 @@ public class CakeManagerFunctionalTest {
 			+ "      \"title\" : \"Lemon cheesecake\",\n" + "      \"description\" : \"A cheesecake made of lemon\",\n"
 			+ "      \"image\" : \"https://s3-eu-west-1.amazonaws.com/s3.mediafileserver.co.uk/carnation/WebFiles/RecipeImages/lemoncheesecake_lg.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/1\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/1\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/1\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"victoria sponge\",\n" + "      \"description\" : \"sponge with jam\",\n"
 			+ "      \"image\" : \"http://www.bbcgoodfood.com/sites/bbcgoodfood.com/files/recipe_images/recipe-image-legacy-id--1001468_10.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/2\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/2\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/2\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"Carrot cake\",\n" + "      \"description\" : \"Bugs bunnys favourite\",\n"
 			+ "      \"image\" : \"http://www.villageinn.com/i/pies/profile/carrotcake_main1.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/3\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/3\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/3\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"Banana cake\",\n" + "      \"description\" : \"Donkey kongs favourite\",\n"
 			+ "      \"image\" : \"http://ukcdn.ar-cdn.com/recipes/xlarge/ff22df7f-dbcd-4a09-81f7-9c1d8395d936.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/4\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/4\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/4\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"Birthday cake\",\n" + "      \"description\" : \"a yearly treat\",\n"
 			+ "      \"image\" : \"http://cornandco.com/wp-content/uploads/2014/05/birthday-cake-popcorn.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/5\"\n" + "        }\n" + "      }\n" + "    }, {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/5\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/5\"\n" + "        }\n" + "      }\n" + "    }, {\n"
 			+ "      \"title\" : \"Rees Krispy Kreme Donut\",\n"
 			+ "      \"description\" : \"Peanut Butter Deelishhhusssnessss\",\n"
 			+ "      \"image\" : \"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg\",\n"
 			+ "      \"_links\" : {\n" + "        \"self\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/6\"\n" + "        },\n" + "        \"cake\" : {\n"
-			+ "          \"href\" : \"http://localhost:8080/cakes/6\"\n" + "        }\n" + "      }\n" + "    } ]\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/6\"\n" + "        },\n" + "        \"cake\" : {\n"
+			+ "          \"href\" : \"http://localhost:8081/cakes/6\"\n" + "        }\n" + "      }\n" + "    } ]\n"
 			+ "  },\n" + "  \"_links\" : {\n" + "    \"self\" : {\n"
-			+ "      \"href\" : \"http://localhost:8080/cakes\"\n" + "    },\n" + "    \"profile\" : {\n"
-			+ "      \"href\" : \"http://localhost:8080/profile/cakes\"\n" + "    }\n" + "  },\n" + "  \"page\" : {\n"
+			+ "      \"href\" : \"http://localhost:8081/cakes\"\n" + "    },\n" + "    \"profile\" : {\n"
+			+ "      \"href\" : \"http://localhost:8081/profile/cakes\"\n" + "    }\n" + "  },\n" + "  \"page\" : {\n"
 			+ "    \"size\" : 20,\n" + "    \"totalElements\" : 6,\n" + "    \"totalPages\" : 1,\n"
 			+ "    \"number\" : 0\n" + "  }\n" + "}";
 
 	private final String expectedPostCakeResponse = "{\n" + "  \"title\" : \"Rees Krispy Kreme Donut\",\n"
 			+ "  \"description\" : \"Peanut Butter Deelishhhusssnessss\",\n"
 			+ "  \"image\" : \"https://www.gannett-cdn.com/presto/2019/08/06/USAT/951746ac-9fcc-4a45-a439-300b72421984-Krispy_Kreme_Reeses_Lovers_Original_Filled_Doughnuts_Key_Visual_2.jpg\",\n"
-			+ "  \"_links\" : {\n" + "    \"self\" : {\n" + "      \"href\" : \"http://localhost:8080/cakes/6\"\n"
-			+ "    },\n" + "    \"cake\" : {\n" + "      \"href\" : \"http://localhost:8080/cakes/6\"\n" + "    }\n"
+			+ "  \"_links\" : {\n" + "    \"self\" : {\n" + "      \"href\" : \"http://localhost:8081/cakes/6\"\n"
+			+ "    },\n" + "    \"cake\" : {\n" + "      \"href\" : \"http://localhost:8081/cakes/6\"\n" + "    }\n"
 			+ "  }\n" + "}";
 
 	private final String expectedPostDuplicateCakeResponse = "{\"status\":\"FORBIDDEN\",\"message\":\"It is forbidden to create a Cake with a duplicate title\",\"debugMessage\":\"could not execute statement; SQL [n/a]; constraint [\\\"PUBLIC.UK_O5VGXH55G2VXMKU8W39A88WH0_INDEX_1 ON PUBLIC.CAKE(TITLE) VALUES 6\\\"; SQL statement:\\ninsert into cake (description, image, title, id) values (?, ?, ?, ?) [23505-200]]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement\"}";
@@ -195,7 +191,7 @@ public class CakeManagerFunctionalTest {
 		MediaType actualContentType = null;
 		String actualJsonHalResponse = null;
 		try {
-			response = restTemplate.exchange("http://localhost:8080/cakes", httpMethod, entity, String.class);
+			response = restTemplate.exchange("http://localhost:8081/cakes", httpMethod, entity, String.class);
 			actualHttpStatus = response.getStatusCode();
 			actualHeaders = response.getHeaders();
 			actualJsonHalResponse = response.getBody();
