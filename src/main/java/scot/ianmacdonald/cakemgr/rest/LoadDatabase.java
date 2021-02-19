@@ -48,9 +48,6 @@ class LoadDatabase {
 
 	@Bean
 	CommandLineRunner initDatabase(CakeRepository cakeRepository, List<Cake> cakeList) {
-		
-		// TODO: remove... corrupt canonical data to test flow of testing in dev and CI
-		cakeList.add(new Cake("Chocolate Cake", "Its so chok letty it hurts", "http://www.allthechoklet.com"));
 
 		return args -> {
 			cakeList.stream().peek(c -> log.info("Preloading " + c.toString() + " to Database"))
