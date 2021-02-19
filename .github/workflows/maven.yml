@@ -20,12 +20,9 @@ jobs:
         java-version: 1.8
     - name: Build with Maven
       run: mvn -B clean verify --file pom.xml
-    - name: Build container image
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        registry: docker.pkg.github.com
-        repository: ${{ github.repository }}/cake-manager-ws
-        tag_with_sha: true
-        tag_with_ref: true
+    - name: docker-login
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
+    - name: build-ws-image
+      run: docker build -t docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest .
+    - name: push-ws-image
+      run: docker push docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest
