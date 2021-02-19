@@ -33,7 +33,7 @@ public class Cake implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	@Column(unique = true, nullable = false, length = 100)
+	@Column(unique = true, nullable = false, length = 50)
 	private String title;
 
 	@JsonAlias({ "desc" })
