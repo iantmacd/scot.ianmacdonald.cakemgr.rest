@@ -94,7 +94,7 @@
 				<configuration>
 					<images>
 						<image>
-							<name>docker.io/scot.ianmacdonald.cakemgr.rest</name>
+							<name>docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest</name>
 							<build>
 								<dockerFile>${project.basedir}/Dockerfile</dockerFile>
 							</build>
