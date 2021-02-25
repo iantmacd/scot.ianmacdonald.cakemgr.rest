@@ -33,12 +33,12 @@ public class CakeRepositoryTest {
 	private final Cake nameDuplicateCake = new Cake("Lemon Cheesecake", "Made from cream cheese and lemons",
 			"http://www.cheeseythings.org/pics/lemoncheessecake.jpg");
 	
-	private List<Cake> expectedCakeList = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake));
+	private final List<Cake> expectedCakeList = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake));
 	
-	private List<Cake> expectedCakeListAfterSave = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake, banoffeePie));
+	private final List<Cake> expectedCakeListAfterSave = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake, banoffeePie));
 	
 	@Autowired
-	CakeRepository cakeRepository = null;
+	CakeRepository cakeRepository;
 	
 	@BeforeEach
 	public void setupTestData() {
@@ -54,7 +54,7 @@ public class CakeRepositoryTest {
 	}
 	
 	@Test
-	public void testReadAll() {
+	public void testFindAll() {
 
 		// retrieve the data using the repository
 		List<Cake> actualCakeList = cakeRepository.findAll();

@@ -16,6 +16,7 @@ public class CakeManagerErrorAdvice {
 	@ResponseBody
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	protected ResponseEntity<CakeManagerError> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+		
 		String error = "It is forbidden to create a Cake with a duplicate title";
 		return new ResponseEntity<CakeManagerError>(new CakeManagerError(HttpStatus.FORBIDDEN, error, ex),
 				HttpStatus.FORBIDDEN);
@@ -24,6 +25,7 @@ public class CakeManagerErrorAdvice {
 	@ResponseBody
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	protected ResponseEntity<CakeManagerError> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+		
 		String error = "The JSON message in the HTTP request was malformed";
 		return new ResponseEntity<CakeManagerError>(new CakeManagerError(HttpStatus.BAD_REQUEST, error, ex),
 				HttpStatus.BAD_REQUEST);

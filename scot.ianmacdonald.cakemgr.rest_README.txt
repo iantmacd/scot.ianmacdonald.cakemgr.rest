@@ -10,7 +10,7 @@ The requirement that both the JSON-based RESTful web service and the the human-r
 
 The comments indicating a preference to move to a more current software stack, and to employ proper client-server separation suggest the implementation of the solution as:
 1. An independent web service implemented using RESTful principles deployed at the "/cakes" endpoint.
-2. A separate client deployed at the "/" endpoint, which consumes the RESTful web service .
+2. A separate client deployed at an alternative port or endpoint, which consumes the RESTful web service .
 3. Implementation using a current and stable framework.  Spring Boot has been chosen for this purpose.
 
 It is also interpreted as given by the requirements that:
@@ -18,8 +18,8 @@ It is also interpreted as given by the requirements that:
 2. The JSON data at the provided web URL is canonical for the initial load of data to the system (https://gist.githubusercontent.com/hart88/198f29ec5114a3ec3460/raw/8dd19a88f9b8d24c23d9960f3300d0c917a4f07c/cake.json).
 
 As a consequence, the system will be built from the bottom up based on Spring Boot Data JPA and Data REST, based on the following functional operations:
-public List<CakeEntity> findAll()
-public CakeEntity save(CakeEntity cake)
+public List<Cake> findAll()
+public Cake save(Cake cake)
 
 Spring Boot will be used to deliver the underlying webservice in a RESTful architecture such that:
 1. All read operations will use the HTTP GET method.
@@ -28,15 +28,15 @@ Spring Boot will be used to deliver the underlying webservice in a RESTful archi
 4. HTTP responses from the JSON RESTful service return appropriate content messages in their JSON bodies, including error messages where appropriate.
 5. The service follows HATEOAS (Hypertext As The Engine Of Application State) principles.
 
-Point 5 will involve the use of HAL (Hypertext Application Language), which in principle allows agnostic clients to receive information about a navigable API, and discover the functions of a RESTful webservice implementation at query time.
+Point 5 will involve the use of HAL (Hypertext Application Language), which in principle allows agnostic clients to receive information about a navigable API, and discover the functions of a RESTful webservice implementation at request time.
 
 The choice of Spring Boot as implementation platform will also facilitate delivery of the Bonus requirements:
-1. Testing using Spring Boot Test and Junit (at unit and integration test level).
-2. Authentication via OAuth2 using ?????.
+1. Testing using Spring Boot Test and Junit (at unit, mock, integration and functional test level).
+2. Web client user authentication via OAuth2.
 
-Containerisation will be delivered using Docker, by providing a sample image configuration, and integrating its use into the maven build.  This will include its use to launch a container for full integration testing of the RESTful webservice.
+Containerisation will be delivered using Docker, by providing a sample image configuration, and integrating its use into the maven build for use in local development and continuous integration.  This will include its use to launch a container for full functional testing of the RESTful webservice.
 
-Continuous Integration via cloud CI will be delivered by integrating the maven build into the cloud CI features on github.  This will include the launching of integration tests using Docker containerisation.
+Continuous Integration via cloud CI will be delivered by integrating the maven build into the cloud CI features on github.  This will include the launching of functional tests using Docker containerisation.
 
 
 2 Implementation Detail
@@ -55,7 +55,7 @@ Class LoadDatabase
 
 Uses the @Component configuration to notify Spring Boot to scan for @Bean components.  The three beans declared are:
 1. An instance of RestTemplate configured with the appropriate media type mappings to convert the application data model between JSON and Java.
-2. An instance of List<Cake> representing the initial data set for the application.  This is converted from JSON at from canonical data source using the RestTemplate, and the distinct() method of Stream is used to filter out duplicate Cake instances.
+2. An instance of List<Cake> representing the initial data set for the application.  This is converted from JSON from the canonical data source using the RestTemplate, and the distinct() method of Stream is used to filter out duplicate Cake instances (relies on the equals() method of Cake).
 3. An instance of CommandLineRunner which is executed at startup by the Spring Boot framework, and uses the JpaRepository instance declared in scot.ianmacdonald.cakemgr.rest.model.CakeRepository to save the List<Cake> to the repository as an initial data set.
 
 2.1.2 Java Package scot.ianmacdonald.cakemgr.rest.model
@@ -67,8 +67,12 @@ The class uses field-based JPA annotations, which use reflection to access field
 Getter methods are provided for the title, description and image fields, which are only used by test code. No accessors are provided for the id field as it is autogenerated and managed by the JPA implementation.
 Overridden hashCode() and equals() methods are provided, which are used by the test frameworks.  The equals method does not make comparison of the JPA-managed id field.
 A toString() method is provided, which is used for logging by the LoadDatabase class when initialising the in-memory H2 DB.
-A default (package) access constructor is provided for instantiation by the JPA implementation.  A public constructor is provided for use by test classes.  This does not set the id field, as it is autogenerated and managed by the JPA implementation.
+A default (package) access no-argument constructor is provided for instantiation by the JPA implementation.  A public constructor is provided for use by test classes.  This does not set the id field, as it is autogenerated and managed by the JPA implementation.
 The @JsonAlias Jackson FasterXml annotation is used to map the "desc" field of the canonical JSON data source to the "description" field of the Cake entity.  This is done so class and DB level fields can all be consistently declared with an unabbreviated name format, which is then exposed via the JSON RESTful API.
+
+Class CakeManagerError
+
+A POJO representing the state of an error message to be returned to a client of the RESTful webservice when an error condition is encountered.
 
 Interface CakeRepository
 
@@ -76,17 +80,12 @@ An extension of Spring JpaRepository.  This acts as a marker interface to allow 
 By extending JpaRepository and not specifying any operational methods, a full implementation of JpaRepository is provided by Spring Boot, along with a dispatcher servlet controller which handles all web requests.  By default, this renders all http responses using HAL to implement a HATEOAS-compatible RESTful webservice.
 One side effect of this ease of implementation is that the controller layer of the application does not specify an explicit controller class.  This has implications for the testing of the MVC controller layer of the application.
 By default, Spring Boot uses the name of the entity class specified in the repository definition (in this case Cake), pluralises it to "cakes" and exposes the RESTful webservice endpoint at "/cakes".
-There is a strong level of coupling between the JSON API data structures and Java Entity classes, which is acceptable for a simple demonstration application, but which could potentially cause maintenance issues for a production level application with a more complex data model. 
 
 2.1.3 Java Package scot.ianmacdonald.cakemgr.rest.controller
 
 As noted above, the exposure of an unmodified JpaRepository using Spring Boot Data JPA and Data REST means no explicit controller class is needed for the application.
 
-Class CakeServiceError
-
-A POJO representing the state of an error message to be returned to a client of the RESTful webservice when an error condition is encountered.
-
-Class CakeServiceErrorAdvice
+Class CakeManagerErrorAdvice
 
 A configuration class which uses the Spring @ControllerAdvice and @ExceptionHandler annotations to decorate the Spring Boot implemented controllers with explicit exception-handling code.
 DataIntegrityViolationException is treated as an HTTP 403 Forbidden error condition related to an attempt to create a Cake with a title that violates the unique integrity constraint on that field in the DB.
@@ -111,29 +110,29 @@ Test class which uses @SpringBootTest annotation to load the application context
 
 Class CakeTest
 
-A plain junit test which tests the equals() method of class Cake, including appropriate handling of null fields.
+A plain junit 5 test which tests the equals() method of class Cake, including appropriate handling of null fields.
 
 Class CakeRepositoryTest
 
 Test class which uses the Spring Boot @DataJpaTest annotation to only load the Data JPA layer of the Spring application context for detailed testing of the configuration at the pure Java level.  @DataJpaTest is used to autowire the instance of the CakeRepository for testing.
 Annotation @Transactional(propagation = Propagation.NOT_SUPPORTED) is used to execute the tests non-transactionally, so that @BeforeEach and @AfterEach junit annotations can be used to set up and tear down test data explicitly, so that test methods can run idempotently.
-The test checks the readAll() and save() operations, as well as checking that a DataIntegrityViolationException is thrown at the Java level when an attempt is made to violate the unique constraint on the title field in the DB.
+The test checks the findAll() and save() operations, as well as checking that a DataIntegrityViolationException is thrown at the Java level when an attempt is made to violate the unique constraint on the title field in the DB.
 
 2.2.3 Java Package scot.ianmacdonald.cakemgr.rest.controller
 
 Class CakeManagerMockMvcTest
 
 A test which uses @SpringBootTest with @AutoConfigureMockMvc to test the application context, in particular that the Spring Boot provided controller dispatcher servlet is properly configured.
-@SpringBootTest loads the entire application context, and @AutoConfigureMockMvc provides a MockMvc instance which is autowired into the test.  The MockMvc instance, an autowired CakeRepository and the MockMvc test framework are used to test findAll() and save() operations of the system, as well as the handling of error conditions (as configured in class CakeServiceErrorAdvice).  The MockMvc framework is used in conjunction with JSON Path matching to test that the http responses in all cases are HATEOAS-compliant JSON response bodies expressed in properly-formed HAL.
+@SpringBootTest loads the entire application context, and @AutoConfigureMockMvc provides a MockMvc instance which is autowired into the test.  The MockMvc instance, an autowired CakeRepository and the MockMvc test framework are used to test findAll() and save() operations of the system, as well as the handling of error conditions (as configured in class CakeManagerErrorAdvice).  The MockMvc framework is used in conjunction with JSON Path matching to test that the http responses in all cases are HATEOAS-compliant JSON response bodies expressed in properly-formed HAL.
 A static @BeforeAll method is used with an @Autowired List<Cake> parameter to initialise static test data fields from the application context.
 All test methods which change the state of the H2 DB use the @DirtiesContext(methodMode = MethodMode.AFTER_METHOD) annotation.  This causes the application context to be discarded and reloaded after each such test, which results in class LoadDatabase reinitialising the default data in the H2 DB.  This results in the test methods executing idempotently.
 
 2.2.4 Java Package scot.ianmacdonald.cakemgr.rest.functional
 
-Class CakeRestServiceIntegrationTest
+Class CakeManagerFunctionalTest
 
 An integration test which uses the @SpringBootTest annotation to autowire the instance of RestTemplate, which is then used to call the deployed RESTful webservice over http.
-This test class is called from the maven build, which uses the io.fabric8 docker-maven-plugin to build and start a Docker image of the application at at http://localhost:8080 in the pre-integration-test phase of the build and stop the webservice in the post-integration-test phase.  During the integration-test phase, the maven-failsafe-plugin executes CakeRestServiceIntegrationTest against the running webservice.
+This test class is called from the maven build, which uses the io.fabric8 docker-maven-plugin to build and start a Docker image of the application at at http://localhost:8080 in the pre-integration-test phase of the build and stop the webservice in the post-integration-test phase.  During the integration-test phase, the maven-failsafe-plugin executes CakeManagerFunctionalTest against the running webservice.
 Since the webservice is being accessed remotely over http, it is not possible to discard and reload the application context without stopping and restarting the Docker image multiple times.  For this reason, the @TestMethodOrder(OrderAnnotation.class) and @Order junit annotations are used to run the tests in a prescribed order, so that they can run in a non-idempotent but predictable fashion.
 
 2.2.5 Maven pom.xml
@@ -142,7 +141,7 @@ A dependency for org.springframework.boot spring-boot-starter-test is included t
 The spring-boot-devtools dependency is included to enable real-time debugging of webapplications in Spring Tools Suite.
 The spring-boot-starter-actuator is included to enable the use of runtime bean inspection tools in Spring Tools Suite.
 Unit tests are launched from the build configuration using the maven-surefire-plugin, excluding all integration tests from this phase of the build.
-The build configuration uses the spring-boot-maven-plugin with the io.fabric8 docker-maven-plugin to build and start a Docker image of the application in the pre-integration-test phase and then stop it in the post-integration-test phase. In between these phases, in the integration-test phase, the maven-failsafe-plugin runs CakeRestServiceIntegrationTest.
+The build configuration uses the spring-boot-maven-plugin with the io.fabric8 docker-maven-plugin to build and start a Docker image of the application in the pre-integration-test phase and then stop it in the post-integration-test phase. In between these phases, in the integration-test phase, the maven-failsafe-plugin runs CakeManagerFunctionalTest.
 
 2.3 Containerisation with Docker
 --------------------------------
