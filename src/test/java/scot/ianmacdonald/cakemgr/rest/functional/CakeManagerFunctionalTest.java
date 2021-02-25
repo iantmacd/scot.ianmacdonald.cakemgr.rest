@@ -29,7 +29,7 @@ public class CakeManagerFunctionalTest {
 
 	private RestTemplate restTemplate = new RestTemplate();
 
-	// http request body Strings
+	// http request body strings
 
 	@Value("${postcake.json.request}")
 	private String postCakeJsonRequest;;
@@ -66,7 +66,6 @@ public class CakeManagerFunctionalTest {
 	public void testPostCake() throws Exception {
 
 		testJsonHalRequest(HttpMethod.POST, postCakeJsonRequest, HttpStatus.CREATED, expectedPostCakeResponse);
-
 	}
 
 	@Test
@@ -75,7 +74,6 @@ public class CakeManagerFunctionalTest {
 
 		testJsonHalRequest(HttpMethod.POST, postCakeJsonRequest, HttpStatus.FORBIDDEN,
 				expectedPostDuplicateCakeResponse);
-
 	}
 
 	@Test
@@ -83,7 +81,6 @@ public class CakeManagerFunctionalTest {
 	public void testGetCakesAgain() throws Exception {
 
 		testJsonHalRequest(HttpMethod.GET, null, HttpStatus.OK, expectedGetCakesAgainResponse);
-
 	}
 
 	@Test
@@ -92,7 +89,6 @@ public class CakeManagerFunctionalTest {
 
 		testJsonHalRequest(HttpMethod.POST, postCakeMalformedJsonRequest, HttpStatus.BAD_REQUEST,
 				expectedPostCakeMalformedJsonResponse);
-
 	}
 
 	private void testJsonHalRequest(final HttpMethod httpMethod, final String jsonRequestBody,
