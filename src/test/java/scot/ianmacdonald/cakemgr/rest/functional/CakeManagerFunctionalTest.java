@@ -29,7 +29,7 @@ public class CakeManagerFunctionalTest {
 
 	private RestTemplate restTemplate = new RestTemplate();
 
-	// http request Strings
+	// http request body Strings
 
 	@Value("${postcake.json.request}")
 	private String postCakeJsonRequest;;
@@ -37,7 +37,7 @@ public class CakeManagerFunctionalTest {
 	@Value("${postcake.malformed.json.request}")
 	private String postCakeMalformedJsonRequest;
 
-	// http response strings
+	// http response body strings
 	
 	@Value("${getcakes.expected.response}")
 	private String expectedGetCakesResponse;
