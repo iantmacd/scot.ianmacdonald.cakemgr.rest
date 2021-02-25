@@ -150,6 +150,7 @@ public class CakeManagerIntegrationTest {
 	}
 
 	private String getEmbeddedCakesJsonPath(final int index, final String field) {
+		
 		return String.format("$._embedded.cakes[%d].%s", index, field);
 	}
 
