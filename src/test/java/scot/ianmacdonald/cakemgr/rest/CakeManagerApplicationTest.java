@@ -20,7 +20,7 @@ class CakeManagerApplicationTest {
 	private RestTemplate restTemplate;
 
 	@Test
-	void contextLoads() {
+	void testApplicationContextLoads() {
 		
 		assertThat(cakeRepository).isNotNull();
 		assertThat(cakeRepository).isInstanceOf(JpaRepository.class);

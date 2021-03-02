@@ -47,7 +47,6 @@ class CakeTest {
 		assertEquals(lemonCheeseCake_6, lemonCheeseCake_7);
 		assertNotEquals(lemonCheeseCake_6, lemonCheeseCake_1);
 		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_6);
-		
 	}
 	
 	@Test
@@ -56,7 +55,6 @@ class CakeTest {
 		assertEquals(lemonCheeseCake_8, lemonCheeseCake_9);
 		assertNotEquals(lemonCheeseCake_8, lemonCheeseCake_1);
 		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_8);
-		
 	}
 	
 	@Test
@@ -65,7 +63,6 @@ class CakeTest {
 		assertEquals(lemonCheeseCake_10, lemonCheeseCake_11);
 		assertNotEquals(lemonCheeseCake_10, lemonCheeseCake_1);
 		assertNotEquals(lemonCheeseCake_1, lemonCheeseCake_10);
-		
 	}
 
 }

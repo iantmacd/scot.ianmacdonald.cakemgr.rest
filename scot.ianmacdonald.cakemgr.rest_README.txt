@@ -92,17 +92,18 @@ By extending JpaRepository and not specifying any operational methods, a full im
 One side effect of this ease of implementation is that the controller layer of the application does not specify an explicit controller class.  This has implications for the testing of the MVC controller layer of the application.
 By default, Spring Boot uses the name of the entity class specified in the repository definition (in this case Cake), pluralises it to "cakes" and exposes the RESTful webservice endpoint at "/cakes".
 
-2.1.4 Maven pom.xml
-
-The inclusion of org.springframework.boot dependencies for spring-boot-starter-data-jpa and spring-boot-starter-data-rest respectively prompt Spring Boot to provide a JpaRepository implementation at runtime, and then expose it as a RESTful webservice.
-The dependency for com.h2database causes the JpaRepository to be implemented using Hibernate and an in-memory H2 DB.
-The dependency for spring-boot-starter-web causes this to be launched in a Tomcat webcontainer.
-The dependency for spring-boot-starter-actuator allows JMX actuator endpoints to be exposed by the web server to provide runtime tooling of the loaded Spring application context beans in Spring Tools Suite.
-
-2.1.5 src/main/resources/application.yml
+2.1.4 src/main/resources/application.yml
 
 A property of management.endpoints.web.exposure.include with a value of "*" exposes all actuator endpoints for use with Spring Tools Suite runtime tooling.
 A property of server.port with value 8081 is provided so that the embedded Tomcat instance is deployed on that port on localhost.
+
+2.1.5 Maven pom.xml
+
+Dependencies spring-boot-starter-data-jpa and spring-boot-starter-data-rest respectively prompt Spring Boot to provide a JpaRepository implementation at runtime, and then expose it as a RESTful webservice.
+Dependency com.h2database causes the JpaRepository to be implemented using Hibernate and an in-memory H2 DB.
+Dependency spring-boot-starter-web causes this to be launched in a Tomcat webcontainer.
+Dependency spring-boot-starter-actuator allows JMX actuator endpoints to be exposed by the web server to enable the use of runtime bean inspection tools in Spring Tools Suite.
+Dependency spring-boot-devtools is included to enable real-time reloading and debugging of webapplications in Spring Tools Suite.
 
 2.2 Testing
 -----------
@@ -113,9 +114,11 @@ The system is tested in slices with unit, integration and functional tests.  Moc
 
 Class CakeManagerApplicationTest
 
-Unit test class which uses @SpringBootTest annotation to load the full application context and test that the CakeRepository and RestTemplate are instantiated, and that CakeRepository is an instance of JpaRepository.
+Unit test class which uses @SpringBootTest and @Autowired annotations to load the full application context and test that the CakeRepository and RestTemplate are instantiated, and that CakeRepository is an instance of JpaRepository.
 
-2.2.2 Java Package scot.ianmacdonald.cakemgr.rest.functional.CakeManagerFunctionalTest
+2.2.2 Java Package scot.ianmacdonald.cakemgr.rest.functional
+
+Class CakeManagerFunctionalTest
 
 A full functional end-to-end test of the RESTful web service which requires a new instance of the application to have just been started on port 8081 in order to work.
 This test purposefully avoids use of the @SpringBootTest annotation, so that the test class does not run the application with its full application context loaded in an embedded Tomcat webserver.  This allows the test to remotely test whatever web service is running on localhost:8081.
@@ -148,9 +151,7 @@ A plain junit 5 test which tests the equals() method of class Cake, including ap
 
 2.2.6 Maven pom.xml
 
-A dependency for org.springframework.boot spring-boot-starter-test is included to enable Spring Boot test facilities.  The junit-vintage-engine dependency is excluded to facilitate the use of JUnit 5 (Jupiter) test capabilities over Junit 4.
-The spring-boot-devtools dependency is included to enable real-time reloading and debugging of webapplications in Spring Tools Suite.
-The spring-boot-starter-actuator is included to enable the use of runtime bean inspection tools in Spring Tools Suite.
+Dependency spring-boot-starter-test is included to enable Spring Boot test facilities.  The junit-vintage-engine dependency is excluded to facilitate the use of JUnit 5 (Jupiter) test capabilities over Junit 4.
 Unit tests are launched from the build configuration using the maven-surefire-plugin, excluding all functional tests from this phase of the build.
 The build configuration uses the spring-boot-maven-plugin with the io.fabric8 docker-maven-plugin to build and start a Docker image of the application in the pre-integration-test phase and then stop it in the post-integration-test phase. In between these phases, in the integration-test phase, the maven-failsafe-plugin runs CakeManagerFunctionalTest. This is the reason that @TestMethodOrder(OrderAnnotation.class) and @Order junit annotations are used to run the tests in a prescribed order, so that they can run in a non-idempotent but predictable fashion without stopping and restarting the Docker image.
 The Docker image of the web service application is build to the local Docker repository as docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest to facilitate its push to the GitHub Packages repository in continuous integration.
@@ -224,6 +225,3 @@ To post a malformed JSON POST request and see the 400 response with an appropria
     curl -i -H "Content-Type:application/json" -d '{"title"; "Banoffee Pie", "description": "Is it banana or toffee? I dont care... its DEEEELISHUSSSS", "image": "https://www.bakedbyanintrovert.com/wp-content/uploads/2019/02/Banoffee-Pie-Recipe-Image-735x735.jpg"}' http://localhost:8081/cakes
     
 N.B. the first colon in the request body above is substituted with an invalid semi-colon.
-
-
-    
