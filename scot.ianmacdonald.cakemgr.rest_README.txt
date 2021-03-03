@@ -30,15 +30,13 @@ Spring Boot will be used to deliver the underlying webservice in a RESTful archi
 
 Point 5 will involve the use of HAL (Hypertext Application Language), which in principle allows agnostic clients to receive information about a navigable API, and discover the functions of a RESTful webservice implementation at request time.
 
-A Rest Client application which consumes the above RESTful Web Service will be delivered as a separate project.
+A Web Client application which consumes the above RESTful Web Service will be delivered as a separate project.
 
 The choice of Spring Boot as implementation platform will also facilitate delivery of the Bonus requirements:
 1. Testing using Spring Boot Test and Junit (at unit, integration and functional test level).
-2. Web client user authentication via OAuth2.
-
-Containerisation will be delivered using Docker, by providing a sample image configuration, and integrating its use into the maven build for use in local development and continuous integration.  This will include use of maven to launch a container for full functional testing of the RESTful webservice and its web client.
-
-Continuous Integration via cloud CI will be delivered by integrating the maven build into the cloud CI features on github.  This will also include the launching of functional tests using Docker containerisation.
+2. Web client user authentication via Spring Boot support for OAuth2.
+3. Continuous Integration via cloud CI will be delivered by integrating the maven build into the cloud CI features on github.
+4. Containerisation will be delivered using Docker, by providing a sample image configuration, and integrating its use into the maven build for use in local development and continuous integration.  This will include use of maven to launch a web service container for full functional testing of the RESTful webservice and its web client.
 
 2 Implementation Detail
 =======================
@@ -50,7 +48,8 @@ Continuous Integration via cloud CI will be delivered by integrating the maven b
 
 Class CakeManagerApplication
 
-Provides the execution entry point for the application.  Makes use of the @SpringBootApplication annotation to implement autoconfiguration and component scanning, including scanning and autowiring of Spring Boot components provided as dependencies on the maven pom.xml classpath.
+Provides the execution entry point for the application.
+Makes use of the @SpringBootApplication annotation to implement autoconfiguration and component scanning, including scanning and autowiring of Spring Boot components provided as dependencies on the maven pom.xml classpath.
 
 Class LoadDatabase
 
@@ -99,11 +98,11 @@ A property of server.port with value 8081 is provided so that the embedded Tomca
 
 2.1.5 Maven pom.xml
 
+Dependency spring-boot-starter-web causes the application to be launched as a web application in a Tomcat webcontainer.
 Dependencies spring-boot-starter-data-jpa and spring-boot-starter-data-rest respectively prompt Spring Boot to provide a JpaRepository implementation at runtime, and then expose it as a RESTful webservice.
 Dependency com.h2database causes the JpaRepository to be implemented using Hibernate and an in-memory H2 DB.
-Dependency spring-boot-starter-web causes this to be launched in a Tomcat webcontainer.
-Dependency spring-boot-starter-actuator allows JMX actuator endpoints to be exposed by the web server to enable the use of runtime bean inspection tools in Spring Tools Suite.
 Dependency spring-boot-devtools is included to enable real-time reloading and debugging of webapplications in Spring Tools Suite.
+Dependency spring-boot-starter-actuator allows JMX actuator endpoints to be exposed by the web server to enable the use of runtime bean inspection tools in Spring Tools Suite.
 
 2.2 Testing
 -----------
@@ -120,18 +119,18 @@ Unit test class which uses @SpringBootTest and @Autowired annotations to load th
 
 Class CakeManagerFunctionalTest
 
-A full functional end-to-end test of the RESTful web service which requires a new instance of the application to have just been started on port 8081 in order to work.
+A full functional end-to-end test of the RESTful web service which requires a new instance of the application to have just been started on localhost port 8081.
 This test purposefully avoids use of the @SpringBootTest annotation, so that the test class does not run the application with its full application context loaded in an embedded Tomcat webserver.  This allows the test to remotely test whatever web service is running on localhost:8081.
 The class uses the @ExtendWith(SpringExtension.class) annotation in conjunction with @TestPropertySource("classpath:application-test.properties") and @Value("${property.name}") to load test data strings from src/test/resources/application-test.properties.  This was done mainly to declutter the test class and reduce errors caused by the need to escape plaintext characters in Java String objects.
-The test uses the @TestMethodOrder(OrderAnnotation.class) and @Order junit annotations to run the test methods in a prescibed order.  This is because when running the test remotely in a fully end-to-end fashion, it is not possible to make the test executions idempotent without repeatedly stopping and restarting Tomcat.  For example, the HATEOS-compatible JSON responses from the webservice expose Cake id values in their link fields.  These id values are autogenerated by Hibernate, so even requesting delete of all data in a tear down method via the webservice after each test would not be sufficient to make each test method fully idempotent, as the id sequence would continue to increment between tests.
-The test uses a RestTemplate to query the webservice, and the JSON responses received are compared to those from the test data suite in application-test.properties.  This allows the webservice to be end-to-end tested in black box mode accessed only via its publicly exposed JSON+HAL interface.
+The test uses the @TestMethodOrder(OrderAnnotation.class) and @Order junit annotations to run the test methods in a prescibed order.  This is because when running the test remotely in a fully end-to-end fashion, it is not possible to make the test executions idempotent without repeatedly stopping and restarting Tomcat.  For example, the HATEOS-compatible JSON/HAL responses from the webservice expose Cake id values in their link fields.  These id values are autogenerated by Hibernate, so even requesting delete of all data in a tear down method via the webservice after each test would not be sufficient to make each test method fully idempotent, as the id sequence would continue to increment between tests.
+The test uses a RestTemplate to query the webservice, and the JSON responses received are compared to those from the test data suite in application-test.properties.  This allows the webservice to be end-to-end tested in black box mode accessed only via its publicly exposed JSON/HAL interface.
 
 2.2.3 Java Package scot.ianmacdonald.cakemgr.rest.integration
 
 Class CakeManagerIntegrationTest
 
 An integration test which uses @SpringBootTest with @AutoConfigureMockMvc to test the application context.  This configuration prevents an embedded Tomcat instance from being run.
-@SpringBootTest loads the entire application context, and @AutoConfigureMockMvc provides a MockMvc instance which is autowired into the test.  The MockMvc instance, an autowired CakeRepository and the MockMvc test framework are used to test findAll() and save() operations of the system, as well as the handling of error conditions (as configured in class CakeManagerErrorAdvice).  The MockMvc framework is used in conjunction with JSON Path matching to test that the http responses in all cases are HATEOAS-compliant JSON response bodies expressed in properly-formed HAL.
+@SpringBootTest loads the entire application context, and @AutoConfigureMockMvc provides a MockMvc instance which is autowired into the test.  The MockMvc instance, an autowired CakeRepository and the MockMvc test framework are used to test findAll() and save() operations of the system, as well as the handling of error conditions (as configured in class CakeManagerErrorAdvice).  The MockMvc framework is used in conjunction with JSON Path matching to test that the http responses in all cases are properly-formed HATEOAS-compliant JSON/HAL response bodies.
 A static @BeforeAll method is used with an @Autowired List<Cake> parameter to initialise static test data fields from the application context, so that the data tested comes from the canonical data source.
 All test methods which change the state of the H2 DB use the @DirtiesContext(methodMode = MethodMode.AFTER_METHOD) annotation.  This causes the application context to be discarded and reloaded after each such test, which results in class LoadDatabase reinitialising the default data in the H2 DB.  This results in the test methods executing idempotently.
 In this test, the H2 DB-backed CakeRepository is acting effectively as both the production DB and a test DB stub, such that the data source for the system does not require to be mocked.
@@ -154,7 +153,7 @@ A plain junit 5 test which tests the equals() method of class Cake, including ap
 Dependency spring-boot-starter-test is included to enable Spring Boot test facilities.  The junit-vintage-engine dependency is excluded to facilitate the use of JUnit 5 (Jupiter) test capabilities over Junit 4.
 Unit tests are launched from the build configuration using the maven-surefire-plugin, excluding all functional tests from this phase of the build.
 The build configuration uses the spring-boot-maven-plugin with the io.fabric8 docker-maven-plugin to build and start a Docker image of the application in the pre-integration-test phase and then stop it in the post-integration-test phase. In between these phases, in the integration-test phase, the maven-failsafe-plugin runs CakeManagerFunctionalTest. This is the reason that @TestMethodOrder(OrderAnnotation.class) and @Order junit annotations are used to run the tests in a prescribed order, so that they can run in a non-idempotent but predictable fashion without stopping and restarting the Docker image.
-The Docker image of the web service application is build to the local Docker repository as docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest to facilitate its push to the GitHub Packages repository in continuous integration.
+The Docker image of the web service application is built to the local Docker repository as docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest to facilitate its push to the GitHub Packages repository in continuous integration.
 
 2.3 Containerisation with Docker
 --------------------------------
@@ -165,9 +164,9 @@ The file Dockerfile describes a sample Docker configuration which is read by the
 -----------------------------------------------------
 
 A github action is configured on the github server in file maven.yml.
-The github action is setup to trigger build and then unit, integration and  functional test of the rest service application when commits are pushed to master.
+The github action is setup to trigger build and then unit, integration and functional test of the rest service application when commits are pushed to master.
 Functional testing includes the use of Docker containerisation for end-to-end functional testing by the maven build, as described above.
-Success of build and test of the application results in a Docker image of the web service application being pushed to the GitHub Packages repository with the name docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest.  From there it can be accessed by the functional tests of the restclient project.
+Success of build and test of the application results in a Docker image of the web service application being pushed to the GitHub Packages repository with the name docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest.  From there it can be accessed by the functional tests of the restclient (Cake Manager Web Client) project.
 
 3 Build, Execute and Exercise the Cake Manager RESTful Web Service
 ==================================================================
@@ -209,7 +208,7 @@ The http://localhost:8081/actuator endpoint provides access to the JMX actuator 
 
 The RESTful service can be exercised from the command line using curl.
 
-To see the initial list of loaded cakes rendered as JSON/HAL:
+To GET the initial list of loaded cakes rendered as JSON/HAL:
     curl -i http://localhost:8081/cakes
     
 To POST a new cake to the system and see its JSON/HAL representation returned:
@@ -224,4 +223,4 @@ To post the same cake again and see the 403 response with an appropriate JSON er
 To post a malformed JSON POST request and see the 400 response with an appropriate JSON error message:
     curl -i -H "Content-Type:application/json" -d '{"title"; "Banoffee Pie", "description": "Is it banana or toffee? I dont care... its DEEEELISHUSSSS", "image": "https://www.bakedbyanintrovert.com/wp-content/uploads/2019/02/Banoffee-Pie-Recipe-Image-735x735.jpg"}' http://localhost:8081/cakes
     
-N.B. the first colon in the request body above is substituted with an invalid semi-colon.
+N.B. the first colon in the final POST request body above is substituted with an invalid semi-colon.

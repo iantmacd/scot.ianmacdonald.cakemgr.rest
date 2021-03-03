@@ -32,6 +32,14 @@ import scot.ianmacdonald.cakemgr.rest.model.CakeRepository;
 @AutoConfigureMockMvc
 public class CakeManagerIntegrationTest {
 
+	@Autowired
+	private CakeRepository cakeRepository;
+
+	@Autowired
+	private MockMvc mockMvc;
+	
+	// static test data fields
+	
 	private static Cake postRequestCake = null;
 
 	private static List<Cake> expectedDbCakes = null;
@@ -41,12 +49,6 @@ public class CakeManagerIntegrationTest {
 	private static String postRequestCakeJson = null;
 
 	private static String postRequestCakeBadJson = null;
-
-	@Autowired
-	private CakeRepository cakeRepository;
-
-	@Autowired
-	private MockMvc mockMvc;
 
 	@BeforeAll
 	static void initDataFromContext(@Autowired List<Cake> initialCakeList) throws JsonProcessingException {
@@ -60,7 +62,6 @@ public class CakeManagerIntegrationTest {
 
 		postRequestCakeJson = new ObjectMapper().writeValueAsString(postRequestCake);
 		postRequestCakeBadJson = postRequestCakeJson.replace(':', ';');
-
 	}
 
 	@Test

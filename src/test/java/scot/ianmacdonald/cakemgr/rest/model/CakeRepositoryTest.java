@@ -20,7 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CakeRepositoryTest {
-
+	
+	@Autowired
+	CakeRepository cakeRepository;
+	
+	// instance test data fields
+	
 	private final Cake lemonCheesecake = new Cake("Lemon Cheesecake", "Lemony, Creamy, Cheesy and DEEELLISSSHHUSSS",
 			"http://www.cakes.org/pics/lemoncheessecake.jpg");
 	
@@ -36,9 +41,7 @@ public class CakeRepositoryTest {
 	private final List<Cake> expectedCakeList = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake));
 	
 	private final List<Cake> expectedCakeListAfterSave = new ArrayList<>(Arrays.asList(lemonCheesecake, chocolateCake, banoffeePie));
-	
-	@Autowired
-	CakeRepository cakeRepository;
+
 	
 	@BeforeEach
 	public void setupTestData() {
