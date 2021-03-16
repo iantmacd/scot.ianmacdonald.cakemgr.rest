@@ -17,6 +17,7 @@ public class Cake implements Serializable {
 	private static final long serialVersionUID = -1066651494071978589L;
 
 	Cake() {
+		
 	}
 
 	/**
