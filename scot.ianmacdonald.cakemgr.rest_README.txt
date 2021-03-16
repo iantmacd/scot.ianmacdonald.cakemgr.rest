@@ -53,7 +53,7 @@ Makes use of the @SpringBootApplication annotation to implement autoconfiguratio
 
 Class LoadDatabase
 
-Uses the @Component configuration to notify Spring Boot to scan for @Bean components.  The three beans declared are:
+Uses the @Configuration annotation to notify Spring Boot to scan for @Bean components.  The three beans declared are:
 1. An instance of RestTemplate configured with the appropriate media type mappings to convert the application data model between JSON and Java.
 2. An instance of List<Cake> representing the initial data set for the application.  This is converted from JSON from the canonical data source using the RestTemplate, and the distinct() method of Stream is used to filter out duplicate Cake instances (relies on the equals() method of Cake).
 3. An instance of CommandLineRunner which is executed at startup by the Spring Boot framework, and uses the JpaRepository instance declared in scot.ianmacdonald.cakemgr.rest.model.CakeRepository to save the List<Cake> to the repository as an initial data set.
@@ -87,7 +87,7 @@ A POJO representing the state of a server error message to be returned to a clie
 Interface CakeRepository
 
 An extension of Spring JpaRepository.  This acts as a marker interface to allow Spring Boot Data JPA to autowire a repository implementation for Cake entities, and Spring Data Rest to expose it as a RESTful API.
-By extending JpaRepository and not specifying any operational methods, a full implementation of JpaRepository is provided by Spring Boot, along with a dispatcher servlet controller which handles all web requests.  By default, this renders all http responses using HAL to implement a HATEOAS-compatible RESTful webservice.
+By extending JpaRepository and not specifying any operational methods, a full implementation of JpaRepository is provided by Spring Boot, along with a dispatcher servlet controller which handles all web requests.  By default, this renders all HTTP responses using HAL to implement a HATEOAS-compatible RESTful webservice.
 One side effect of this ease of implementation is that the controller layer of the application does not specify an explicit controller class.  This has implications for the testing of the MVC controller layer of the application.
 By default, Spring Boot uses the name of the entity class specified in the repository definition (in this case Cake), pluralises it to "cakes" and exposes the RESTful webservice endpoint at "/cakes".
 
@@ -100,7 +100,7 @@ A property of server.port with value 8081 is provided so that the embedded Tomca
 
 Dependency spring-boot-starter-web causes the application to be launched as a web application in a Tomcat webcontainer.
 Dependencies spring-boot-starter-data-jpa and spring-boot-starter-data-rest respectively prompt Spring Boot to provide a JpaRepository implementation at runtime, and then expose it as a RESTful webservice.
-Dependency com.h2database causes the JpaRepository to be implemented using Hibernate and an in-memory H2 DB.
+Dependency h2 causes the JpaRepository to be implemented using Hibernate and an in-memory H2 DB.
 Dependency spring-boot-devtools is included to enable real-time reloading and debugging of webapplications in Spring Tools Suite.
 Dependency spring-boot-starter-actuator allows JMX actuator endpoints to be exposed by the web server to enable the use of runtime bean inspection tools in Spring Tools Suite.
 
@@ -130,7 +130,7 @@ The test uses a RestTemplate to query the webservice, and the JSON responses rec
 Class CakeManagerIntegrationTest
 
 An integration test which uses @SpringBootTest with @AutoConfigureMockMvc to test the application context.  This configuration prevents an embedded Tomcat instance from being run.
-@SpringBootTest loads the entire application context, and @AutoConfigureMockMvc provides a MockMvc instance which is autowired into the test.  The MockMvc instance, an autowired CakeRepository and the MockMvc test framework are used to test findAll() and save() operations of the system, as well as the handling of error conditions (as configured in class CakeManagerErrorAdvice).  The MockMvc framework is used in conjunction with JSON Path matching to test that the http responses in all cases are properly-formed HATEOAS-compliant JSON/HAL response bodies.
+@SpringBootTest loads the entire application context, and @AutoConfigureMockMvc provides a MockMvc instance which is autowired into the test.  The MockMvc instance, an autowired CakeRepository and the MockMvc test framework are used to test findAll() and save() operations of the system, as well as the handling of error conditions (as configured in class CakeManagerErrorAdvice).  The MockMvc framework is used in conjunction with JSON Path matching to test that the HTTP responses in all cases are properly-formed HATEOAS-compliant JSON/HAL response bodies.
 A static @BeforeAll method is used with an @Autowired List<Cake> parameter to initialise static test data fields from the application context, so that the data tested comes from the canonical data source.
 All test methods which change the state of the H2 DB use the @DirtiesContext(methodMode = MethodMode.AFTER_METHOD) annotation.  This causes the application context to be discarded and reloaded after each such test, which results in class LoadDatabase reinitialising the default data in the H2 DB.  This results in the test methods executing idempotently.
 In this test, the H2 DB-backed CakeRepository is acting effectively as both the production DB and a test DB stub, such that the data source for the system does not require to be mocked.
@@ -200,7 +200,7 @@ Both of these executions will launch the RESTful webservice application in an em
 3.4.1 From a Browser
 
 Accessing http://localhost:8081/cakes will display the initial list of cakes loaded to the system.
-By default, Spring Boot exposes a link to the cakes endpoint and the /profile endpoint at http://localhost:8081
+By default, Spring Boot exposes a link to the /cakes endpoint and the /profile endpoint at http://localhost:8081
 The /profile/cakes endpoint linked from there exposes an ALPS (Application-Level Profile Semantics) metadata description of the service.
 The http://localhost:8081/actuator endpoint provides access to the JMX actuator services exposed by the management.endpoints.web.exposure.include="*" property as described above.
 
