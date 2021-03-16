@@ -24,11 +24,3 @@ jobs:
       run: echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
     - name: push-ws-image
       run: docker push docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest
-    - name: Trigger Rest Client Workflow
-      if: success()
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_IANTMACD_PAT }}
-        repository: ${{ github.repository }}
-        event-type: trigger-workflow-restclient
-        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
