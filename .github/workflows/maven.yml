@@ -25,5 +25,6 @@ jobs:
     - name: push-ws-image
       run: docker push docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest
     - name: trigger-restclient-build
+      if: success()
       run: |
        curl -XPOST -u "${{ secrets.PAT_USERNAME}}:${{secrets.REPO_IANTMACD_PAT}}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/iantmacd/scot.ianmacdonald.cakemgr.restclient/dispatches --data '{"event_type": "build_application"}'
