@@ -167,6 +167,7 @@ A github action is configured on the github server in file maven.yml.
 The github action is setup to trigger build and then unit, integration and functional test of the rest service application when commits are pushed to master.
 Functional testing includes the use of Docker containerisation for end-to-end functional testing by the maven build, as described above.
 Success of build and test of the application results in a Docker image of the web service application being pushed to the GitHub Packages repository with the name docker.pkg.github.com/iantmacd/scot.ianmacdonald.cakemgr.rest/cake-manager-ws:latest.  From there it can be accessed by the functional tests of the restclient (Cake Manager Web Client) project.
+Finally, a successful build triggers a repository_dispatch event using the github API in order to trigger a build of the restclient project.
 
 3 Build, Execute and Exercise the Cake Manager RESTful Web Service
 ==================================================================
