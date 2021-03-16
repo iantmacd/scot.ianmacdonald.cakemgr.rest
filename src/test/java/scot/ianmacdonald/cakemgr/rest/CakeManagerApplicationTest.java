@@ -27,10 +27,5 @@ class CakeManagerApplicationTest {
 		assertThat(cakeRepository).isInstanceOf(JpaRepository.class);
 		assertThat(restTemplate).isNotNull();
 	}
-	
-	@Test
-	void failBuild() {
-		fail();
-	}
 
 }
