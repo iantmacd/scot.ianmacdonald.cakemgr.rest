@@ -43,6 +43,7 @@ class LoadDatabase {
 				Cake[].class);
 		Cake[] cakeArray = cakesResponseBody.getBody();
 		List<Cake> uniqueCakeList = Arrays.stream(cakeArray).distinct().collect(Collectors.toList());
+		uniqueCakeList.get(0).setTitle("Lemon Cheesecake");
 		return uniqueCakeList;
 	}
 
