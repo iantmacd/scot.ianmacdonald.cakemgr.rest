@@ -49,11 +49,6 @@ public class Cake implements Serializable {
 		
 		return this.title;
 	}
-	
-	public void setTitle(String title) {
-		
-		this.title = title;
-	}
 
 	public String getDescription() {
 		
